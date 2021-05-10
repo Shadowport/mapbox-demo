@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Center the map on a clicked feature</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicnVpemhlIiwiYSI6ImNrb2g3N2twZTB4bm0ybm5ydDEzMmlmOHQifQ.ap9PlpOTCHCL5dzsb_IZnQ';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10',
+            center: [116.38, 39.916],
+            zoom: 11.5
+        });
+
+        map.on('load', function () {
+            // Add a GeoJSON source with 3 points.
+            map.addSource('points', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>东城法院</strong><p>北京市东城区交道口东大街1号</p><br><button>查看</button>',
+                                'icon': 'theatre-15'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    116.41607080357863,
+                                    39.94130492570606
+
+                                ]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>最高人民法院</strong><p>北京市东城区东交民巷27号</p><br><button>查看</button>',
+                                'icon': 'theatre-15'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    116.40536258815199,
+                                    39.90295084836171
+                                ]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'properties': {
+                                'description':
+                                    '<strong>北京市监狱管理局中心医院</strong><p>北京市西城区右安门东街</p><br><button>查看</button>',
+                                'icon': 'theatre-15'
+                            },
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [
+                                    116.36987080386214,
+                                    39.871634949579345
+                                ]
+                            }
+                        }
+                    ]
+                }
+            });
+            map.addSource('route', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': [
+                            [116.40536258815199, 39.90295084836171],
+                            [116.36987080386214, 39.871634949579345]
+                        ]
+                    }
+                }
+            });
+            // Add a circle layer
+            map.addLayer({
+                'id': 'circle',
+                'type': 'circle',
+                'source': 'points',
+                'paint': {
+                    'circle-color': '#4264fb',
+                    'circle-radius': 8,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#ffffff'
+                }
+            });
+            map.addLayer({
+                'id': 'route',
+                'type': 'line',
+                'source': 'route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                },
+                'paint': {
+                    'line-color': '#4264fb',
+                    'line-width': 3,
+                    'line-opacity': 0.5
+                }
+            });
+
+            // Center the map on the coordinates of any clicked circle from the 'circle' layer.
+            map.on('click', 'circle', function (e) {
+                var coordinates = e.features[0].geometry.coordinates.slice();
+                var description = e.features[0].properties.description;
+
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+
+                map.flyTo({
+                    center: e.features[0].geometry.coordinates
+                });
+            });
+
+            // Change the cursor to a pointer when the it enters a feature in the 'circle' layer.
+            map.on('mouseenter', 'circle', function () {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change it back to a pointer when it leaves.
+            map.on('mouseleave', 'circle', function () {
+                map.getCanvas().style.cursor = '';
+            });
+        });
+    </script>
+
+</body>
+
+</html>
