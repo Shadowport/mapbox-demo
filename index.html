@@ -19,11 +19,26 @@
             bottom: 0;
             width: 100%;
         }
+
+        #fly {
+            display: block;
+            position: relative;
+            margin: 0px auto;
+            width: 50%;
+            height: 40px;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            font-size: 12px;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
-    <div id="map"></div>
+    <div id="map"></div><br>
+    <button id="fly">中国</button><br>
+    <button id="flybj">北京</button>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicnVpemhlIiwiYSI6ImNrb2g3N2twZTB4bm0ybm5ydDEzMmlmOHQifQ.ap9PlpOTCHCL5dzsb_IZnQ';
         var map = new mapboxgl.Map({
@@ -130,6 +145,8 @@
                 }
             });
 
+            
+
             // Center the map on the coordinates of any clicked circle from the 'circle' layer.
             map.on('click', 'circle', function (e) {
                 var coordinates = e.features[0].geometry.coordinates.slice();
@@ -145,7 +162,9 @@
                     .addTo(map);
 
                 map.flyTo({
-                    center: e.features[0].geometry.coordinates
+                    center: e.features[0].geometry.coordinates,
+                    zoom: 11.5,
+                    essential: true
                 });
             });
 
@@ -157,6 +176,26 @@
             // Change it back to a pointer when it leaves.
             map.on('mouseleave', 'circle', function () {
                 map.getCanvas().style.cursor = '';
+            });
+        });
+        document.getElementById('fly').addEventListener('click', function () {
+            map.flyTo({
+                center: [
+                106.2309,
+                38.4872
+                ],
+                zoom: 3.5,
+                essential: true // this animation is considered essential with respect to prefers-reduced-motion
+            });
+        });
+        document.getElementById('flybj').addEventListener('click', function () {
+       
+            map.flyTo({
+                center: [
+                116.3800, 
+                39.9160
+                ],
+                essential: true // this animation is considered essential with respect to prefers-reduced-motion
             });
         });
     </script>
